@@ -1,4 +1,5 @@
 import { chatClient, streamClient } from "../lib/stream.js";
+import { ENV } from "../lib/env.js";
 import Session from "../models/Session.js";
 
 export async function createSession(req, res) {
@@ -106,12 +107,17 @@ export async function joinSession(req, res) {
       return res.status(400).json({ message: "Cannot join a completed session" });
     }
 
-    if (session.host.toString() === userId.toString()) {
-      return res.status(400).json({ message: "Host cannot join their own session as participant" });
+    const isAuthDisabled = ENV.SKIP_AUTH === "true" || process.env.VERCEL === "1";
+
+    if (!isAuthDisabled && session.host.toString() === userId.toString()) {
+      return res
+        .status(400)
+        .json({ message: "Host cannot join their own session as participant" });
     }
 
-    // check if session is already full - has a participant
-    if (session.participant) return res.status(409).json({ message: "Session is full" });
+    if (!isAuthDisabled && session.participant) {
+      return res.status(409).json({ message: "Session is full" });
+    }
 
     session.participant = userId;
     await session.save();
