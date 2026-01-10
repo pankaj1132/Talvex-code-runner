@@ -1,4 +1,4 @@
-import { requireAuth, clerkClient } from "@clerk/express";
+import { clerkClient } from "@clerk/express";
 import User from "../models/User.js";
 import { ENV } from "../lib/env.js";
 
@@ -74,14 +74,6 @@ const guestAuthMiddleware = async (req, res, next) => {
   }
 };
 
-const isAuthDisabled = ENV.SKIP_AUTH === "true";
+const isAuthDisabled = ENV.SKIP_AUTH === "true" || process.env.VERCEL === "1";
 
-let protectRoute;
-
-if (isAuthDisabled) {
-  protectRoute = guestAuthMiddleware;
-} else {
-  protectRoute = [requireAuth(), clerkAuthMiddleware];
-}
-
-export { protectRoute };
+export const protectRoute = isAuthDisabled ? guestAuthMiddleware : clerkAuthMiddleware;
