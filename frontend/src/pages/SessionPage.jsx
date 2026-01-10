@@ -119,7 +119,7 @@ function SessionPage() {
                         )}
                         <p className="text-base-content/60 mt-2">
                           Host: {session?.host?.name || "Loading..."} •{" "}
-                          {session?.participant ? 2 : 1}/2 participants
+                          {session?.participant ? 2 : 1}/5 participants
                         </p>
                       </div>
 
