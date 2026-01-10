@@ -12,4 +12,5 @@ export const ENV = {
   STREAM_API_KEY: process.env.STREAM_API_KEY,
   STREAM_API_SECRET: process.env.STREAM_API_SECRET,
   SKIP_AUTH: process.env.SKIP_AUTH,
+   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
 };

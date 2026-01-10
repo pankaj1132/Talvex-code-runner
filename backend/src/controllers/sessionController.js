@@ -44,7 +44,12 @@ export async function createSession(req, res) {
 
 export async function getActiveSessions(_, res) {
   try {
-    const sessions = await Session.find({ status: "active" })
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+
+    const sessions = await Session.find({
+      status: "active",
+      createdAt: { $gte: twoHoursAgo },
+    })
       .populate("host", "name profileImage email clerkId")
       .populate("participant", "name profileImage email clerkId")
       .sort({ createdAt: -1 })
@@ -86,8 +91,23 @@ export async function getSessionById(req, res) {
 
     if (!session) return res.status(404).json({ message: "Session not found" });
 
+    const twoHoursMs = 2 * 60 * 60 * 1000;
+    const ageMs = Date.now() - new Date(session.createdAt).getTime();
+
+    if (session.status === "active" && ageMs > twoHoursMs) {
+      session.status = "completed";
+      await session.save();
+    }
+
     res.status(200).json({ session });
   } catch (error) {
+    const twoHoursMs = 2 * 60 * 60 * 1000;
+    const ageMs = Date.now() - new Date(session.createdAt).getTime();
+
+    if (session.status === "active" && ageMs > twoHoursMs) {
+      session.status = "completed";
+      await session.save();
+    }
     console.log("Error in getSessionById controller:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
@@ -105,6 +125,15 @@ export async function joinSession(req, res) {
 
     if (session.status !== "active") {
       return res.status(400).json({ message: "Cannot join a completed session" });
+    }
+
+    const twoHoursMs = 2 * 60 * 60 * 1000;
+    const ageMs = Date.now() - new Date(session.createdAt).getTime();
+
+    if (ageMs > twoHoursMs) {
+      session.status = "completed";
+      await session.save();
+      return res.status(400).json({ message: "Session has expired" });
     }
 
     const isAuthDisabled = ENV.SKIP_AUTH === "true" || process.env.VERCEL === "1";

@@ -245,7 +245,9 @@ function SessionPage() {
                   <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
 
                   <Panel defaultSize={30} minSize={15}>
-                    <OutputPanel output={output} />
+                    <div className="h-full">
+                      <OutputPanel output={output} />
+                    </div>
                   </Panel>
                 </PanelGroup>
               </Panel>
