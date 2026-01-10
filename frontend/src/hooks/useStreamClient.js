@@ -17,7 +17,6 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
 
     const initCall = async () => {
       if (!session?.callId) return;
-      if (!isHost && !isParticipant) return;
       if (session.status === "completed") return;
 
       try {
@@ -77,7 +76,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
         }
       })();
     };
-  }, [session, loadingSession, isHost, isParticipant]);
+  }, [session, loadingSession]);
 
   return {
     streamClient,
