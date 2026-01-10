@@ -1,25 +1,48 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ENV } from "./env.js";
 
-let genAI = null;
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const DEFAULT_MODEL = ENV.GROQ_MODEL || "llama-3.3-70b-versatile";
 
-if (!ENV.GEMINI_API_KEY) {
-  console.warn("GEMINI_API_KEY is not set. AI features will be disabled.");
-} else {
-  genAI = new GoogleGenerativeAI(ENV.GEMINI_API_KEY);
+if (!ENV.GROQ_API_KEY) {
+  console.warn("GROQ_API_KEY is not set. AI features will be disabled.");
 }
 
-// Match the model you tested via curl; overridable via GEMINI_MODEL
-const DEFAULT_MODEL = ENV.GEMINI_MODEL || "gemini-2.0-flash";
-
 export async function generateAiText(prompt, options = {}) {
-  if (!genAI) {
-    throw new Error("GEMINI_API_KEY is not configured on the server.");
+  if (!ENV.GROQ_API_KEY) {
+    throw new Error("GROQ_API_KEY is not configured on the server.");
   }
 
-  const model = genAI.getGenerativeModel({ model: options.model || DEFAULT_MODEL });
+  const model = options.model || DEFAULT_MODEL;
 
-  const result = await model.generateContent(prompt);
-  const response = result.response;
-  return response.text();
+  const response = await fetch(GROQ_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${ENV.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      temperature: options.temperature ?? 0.4,
+      max_tokens: options.maxTokens ?? 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    const error = new Error(
+      `Groq API error: ${response.status} ${response.statusText} - ${errorText}`
+    );
+    error.status = response.status;
+    throw error;
+  }
+
+  const data = await response.json();
+  const content = data?.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error("No content returned from Groq API.");
+  }
+
+  return content;
 }

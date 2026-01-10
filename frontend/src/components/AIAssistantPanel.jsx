@@ -55,7 +55,22 @@ function AIAssistantPanel({ problemData, selectedLanguage, code }) {
       }
     } catch (error) {
       console.error("AI request failed", error);
-      setResponseText("Failed to get AI response. Please try again.");
+      const code = error?.response?.data?.code;
+      const message = error?.response?.data?.message;
+
+      if (code === "AI_DISABLED") {
+        setResponseText(
+          message ||
+            "AI assistant is currently disabled on the server. Please try again later."
+        );
+      } else if (code === "AI_QUOTA_EXCEEDED") {
+        setResponseText(
+          message ||
+            "AI service has hit its quota or rate limit. Please wait a bit and try again."
+        );
+      } else {
+        setResponseText("Failed to get AI response. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

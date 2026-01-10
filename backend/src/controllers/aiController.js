@@ -22,12 +22,6 @@ function buildProblemContext({ problemTitle, problemDescription, constraints, ex
 
 export async function getHint(req, res) {
   try {
-    // AI temporarily disabled (Gemini quota / billing not configured).
-    return res.status(503).json({
-      code: "AI_DISABLED",
-      message: "AI assistant is temporarily disabled. Please try again later.",
-    });
-
     const { problemTitle, problemDescription, constraints, examples, language, code } = req.body;
 
     const problemContext = buildProblemContext({
@@ -47,7 +41,7 @@ export async function getHint(req, res) {
     if (error.status === 429 || (typeof error.message === "string" && error.message.toLowerCase().includes("quota"))) {
       return res
         .status(429)
-        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded for Gemini API. Please try again later or update your Gemini plan/billing." });
+        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded or temporarily unavailable. Please try again later." });
     }
     res.status(500).json({ message: error.message || "Failed to generate hint" });
   }
@@ -55,12 +49,6 @@ export async function getHint(req, res) {
 
 export async function getReview(req, res) {
   try {
-    // AI temporarily disabled (Gemini quota / billing not configured).
-    return res.status(503).json({
-      code: "AI_DISABLED",
-      message: "AI assistant is temporarily disabled. Please try again later.",
-    });
-
     const { problemTitle, problemDescription, constraints, examples, language, code } = req.body;
 
     const problemContext = buildProblemContext({
@@ -80,7 +68,7 @@ export async function getReview(req, res) {
     if (error.status === 429 || (typeof error.message === "string" && error.message.toLowerCase().includes("quota"))) {
       return res
         .status(429)
-        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded for Gemini API. Please try again later or update your Gemini plan/billing." });
+        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded or temporarily unavailable. Please try again later." });
     }
     res.status(500).json({ message: error.message || "Failed to generate review" });
   }
@@ -88,12 +76,6 @@ export async function getReview(req, res) {
 
 export async function getSummary(req, res) {
   try {
-    // AI temporarily disabled (Gemini quota / billing not configured).
-    return res.status(503).json({
-      code: "AI_DISABLED",
-      message: "AI assistant is temporarily disabled. Please try again later.",
-    });
-
     const { problemTitle, problemDescription, language, code, notes } = req.body;
 
     const problemContext = buildProblemContext({ problemTitle, problemDescription });
@@ -108,7 +90,7 @@ export async function getSummary(req, res) {
     if (error.status === 429 || (typeof error.message === "string" && error.message.toLowerCase().includes("quota"))) {
       return res
         .status(429)
-        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded for Gemini API. Please try again later or update your Gemini plan/billing." });
+        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded or temporarily unavailable. Please try again later." });
     }
     res.status(500).json({ message: error.message || "Failed to generate summary" });
   }
@@ -116,12 +98,6 @@ export async function getSummary(req, res) {
 
 export async function getFollowup(req, res) {
   try {
-    // AI temporarily disabled (Gemini quota / billing not configured).
-    return res.status(503).json({
-      code: "AI_DISABLED",
-      message: "AI assistant is temporarily disabled. Please try again later.",
-    });
-
     const { problemTitle, problemDescription, difficulty = "medium" } = req.body;
 
     const problemContext = buildProblemContext({ problemTitle, problemDescription });
@@ -148,7 +124,7 @@ export async function getFollowup(req, res) {
     if (error.status === 429 || (typeof error.message === "string" && error.message.toLowerCase().includes("quota"))) {
       return res
         .status(429)
-        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded for Gemini API. Please try again later or update your Gemini plan/billing." });
+        .json({ code: "AI_QUOTA_EXCEEDED", message: "AI quota exceeded or temporarily unavailable. Please try again later." });
     }
     res.status(500).json({ message: error.message || "Failed to generate follow-up problem" });
   }
